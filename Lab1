@@ -19,7 +19,6 @@ void * potencia (void * arg){  // função para calcular a potencial, utilizada 
     pthread_exit(NULL);
     }
     
-
 int main(void){
     pthread_t tid[2]; 
     int id[2];
