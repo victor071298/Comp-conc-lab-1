@@ -1,18 +1,19 @@
 #include<stdio.h>
 #include<pthread.h>
 #include<stdlib.h>
-int vetor[10000]; 
+int vetort[10000];  //vetor que será aplicado multithread//
+int vetorn[10000];  //vetor que será feito de modo sequencial//
 
-void * potencia (void * arg){
+void * potencia (void * arg){  // função para calcular a potencial, utilizada por ambas as threads//
     int id=*(int*)arg;
-    if(id==1){
+    if(id==1){            // conta realizada pela primeira thread//
         for(int i=0;i<5000;i++){
-            vetor[i]=vetor[i]*vetor[i];
+            vetort[i]=vetort[i]*vetort[i];
         }
     }
     else{
-        for(int i=50;i<10000;i++){
-            vetor[i]=vetor[i]*vetor[i];
+        for(int i=5000;i<10000;i++){   // conta realizada pela segunda thread//
+            vetort[i]=vetort[i]*vetort[i];
         }
     }
     pthread_exit(NULL);
@@ -23,24 +24,32 @@ int main(void){
     pthread_t tid[2]; 
     int id[2];
     for(int i=0;i<10000;i++){
-        vetor[i]=i;
+        vetort[i]=i;
+        vetorn[i]=i;
+    }
+    for(int i=0;i<10000;i++){  //vetor sendo preenchido de maneira sequencial//
+        vetorn[i]=vetorn[i]*vetorn[i];
     }
     
-    for(int i=0;i<2;i++){
+    for(int i=0;i<2;i++){   //criação das threads para preencherem o vetor utilizando multithread//
         id[i]=i+1;
         if (pthread_create(&tid[i], NULL, potencia, (void*)&id[i])){
             printf("--ERRO: pthread_create()\n"); exit(-1);
         }
     }
    
-    for(int i=0;i<2;i++){
+    for(int i=0;i<2;i++){  //join é utilizado para garantir que a main aguardará a finalização das threads//
         if (pthread_join(tid[i], NULL)){
             printf("--ERRO: pthread_join()\n"); exit(-1);
         }
     }
 
-    for(int i=1;i<=10000;i++){
-        printf("%d valor : %d\n", i , vetor[i-1]);
+    for(int i=0;i<10000;i++){
+        if(vetort[i]!=vetorn[i]){
+            printf("O vetor nao foi preenchido corretamente");
+            return 1;
+        }
     }
+    printf("O vetor foi preenchido corretamente");
     return 0;
 }
